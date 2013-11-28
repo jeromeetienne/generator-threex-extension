@@ -1,26 +1,27 @@
 <!DOCTYPE html>
-<script src='vendor/three.js/build/three.js'></script>
+<script src='vendor/three.js/build/three.min.js'></script>
+<script src='../threex.<%= extensionName.toLowerCase() %>.js'></script>
 <body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'><script>
 	var renderer	= new THREE.WebGLRenderer();
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
 
-	var updateFcts	= [];
+	var onRenderFcts= [];
 	var scene	= new THREE.Scene();
 	var camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100 );
-	camera.position.z = 3;
+	camera.position.z = 1.5;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		add an object and make it move					//
 	//////////////////////////////////////////////////////////////////////////////////	
-	var geometry	= new THREE.CubeGeometry( 1, 1, 1);
+	var geometry	= new THREE.CubeGeometry(1, 1, 1);
 	var material	= new THREE.MeshNormalMaterial();
 	var mesh	= new THREE.Mesh( geometry, material );
 	scene.add( mesh );
 	
-	updateFcts.push(function(delta, now){
-		// mesh.rotation.x += 1 * delta;
-		// mesh.rotation.y += 2 * delta;		
+	onRenderFcts.push(function(delta, now){
+		mesh.rotation.x += 0.1 * delta * Math.PI*2;
+		mesh.rotation.y += 0.2 * delta * Math.PI*2;		
 	})
 	
 	//////////////////////////////////////////////////////////////////////////////////
@@ -31,7 +32,7 @@
 		mouse.x	= (event.clientX / window.innerWidth ) - 0.5
 		mouse.y	= (event.clientY / window.innerHeight) - 0.5
 	}, false)
-	updateFcts.push(function(delta, now){
+	onRenderFcts.push(function(delta, now){
 		camera.position.x += (mouse.x*5 - camera.position.x) * (delta*3)
 		camera.position.y += (mouse.y*5 - camera.position.y) * (delta*3)
 		camera.lookAt( scene.position )
@@ -41,7 +42,7 @@
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the scene						//
 	//////////////////////////////////////////////////////////////////////////////////
-	updateFcts.push(function(){
+	onRenderFcts.push(function(){
 		renderer.render( scene, camera );		
 	})
 	
@@ -57,8 +58,8 @@
 		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
 		lastTimeMsec	= nowMsec
 		// call each update function
-		updateFcts.forEach(function(updateFn){
-			updateFn(deltaMsec/1000, nowMsec/1000)
+		onRenderFcts.forEach(function(onRenderFct){
+			onRenderFct(deltaMsec/1000, nowMsec/1000)
 		})
 	})
 </script></body>

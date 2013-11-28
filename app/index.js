@@ -4,7 +4,7 @@ var path = require('path');
 var yeoman = require('yeoman-generator');
 
 
-var ThreejsGenerator = module.exports = function ThreejsGenerator(args, options, config) {
+var ThreexGenerator = module.exports = function ThreexGenerator(args, options, config) {
   yeoman.generators.Base.apply(this, arguments);
 
   // this.on('end', function () {
@@ -14,9 +14,9 @@ var ThreejsGenerator = module.exports = function ThreejsGenerator(args, options,
   this.pkg = JSON.parse(this.readFileAsString(path.join(__dirname, '../package.json')));
 };
 
-util.inherits(ThreejsGenerator, yeoman.generators.Base);
+util.inherits(ThreexGenerator, yeoman.generators.Base);
 
-ThreejsGenerator.prototype.askFor = function askFor() {
+ThreexGenerator.prototype.askFor = function askFor() {
   var cb = this.async();
 
   // have Yeoman greet the user.
@@ -25,32 +25,47 @@ ThreejsGenerator.prototype.askFor = function askFor() {
   var prompts = [{
     name: 'extensionName',
     message: 'Which name would you give it ?',
-    default: 'SuperExtension'
+    default: 'Sample'
+  },
+  {
+    type: 'confirm',
+    name: 'withRequirejs',
+    message: 'Would you like to add require.js?',
+    default: false
   }];
 
   this.prompt(prompts, function (props) {
-    this.extensionName = props.extensionName;
+    this.withRequirejs  = props.withRequirejs;
+    this.extensionName  = props.extensionName;
 
     cb();
   }.bind(this));
 };
 
-ThreejsGenerator.prototype.app = function app() {
+ThreexGenerator.prototype.app = function app() {
 
-  this.copy('Makefile', 'Makefile');
+  this.template('Makefile', 'Makefile');
   this.template('README.md', 'README.md');
+  this.template('LICENSE', 'LICENSE');
+
+  this.template('examples/basic.html', 'examples/basic.html');   
+  this.template('threex.sample.js', 'threex.'+this.extensionName.toLowerCase()+'.js');   
 
   this.mkdir('examples');
   this.mkdir('examples/vendor');
   this.mkdir('examples/vendor/three.js');
   this.mkdir('examples/vendor/three.js/build');
-  this.copy( 'examples/vendor/three.js/build/three.js', 'examples/vendor/three.js/build/three.js');
+  this.copy( 'examples/vendor/three.js/build/three-min.js', 'examples/vendor/three.js/build/three-min.js');
 
-  this.copy('examples/basic.html', 'examples/basic.html');   
-  this.template('threex.sample.js', 'threex.'+this.extensionName.toLowerCase()+'.js');   
+  if( this.withRequirejs ){
+    this.mkdir('examples/vendor/require.js');
+    this.copy('examples/vendor/require.js/require.js', 'examples/vendor/require.js/require.js');
+
+    this.template('examples/requirejs.html', 'examples/requirejs.html');
+  }
 };
 
-ThreejsGenerator.prototype.projectfiles = function projectfiles() {
+ThreexGenerator.prototype.projectfiles = function projectfiles() {
   // this.copy('editorconfig', '.editorconfig');
   // this.copy('jshintrc', '.jshintrc');
 };
